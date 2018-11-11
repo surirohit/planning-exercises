@@ -3,6 +3,7 @@ from duckietown_serialization_ds1 import Serializable
 from contracts import check_isinstance
 import geometry as geo
 import numpy as np
+import math
 
 class CarCommands(Serializable):
     '''
@@ -52,8 +53,11 @@ class CarDynamics(GenericKinematicsSE2):
         check_isinstance(commands, CarCommands)
 
         # Your code comes here!
-        linear = [0,0]
-        angular = 0
+        q,_ = self.TSE2_from_state()
+        _, direction = geo.translation_angle_from_SE2(q)
+
+        linear = [commands.linear_velocity, 0]
+        angular = (commands.linear_velocity / self.parameters.wheel_distance) * math.tan(commands.steering_angle)
         # represent this as se(2)
         commands_se2 = geo.se2_from_linear_angular(linear, angular)
 
